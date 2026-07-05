@@ -1,14 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.api.v1.router import api_router
 from app.core.config import settings
 
 from pathlib import Path
-
-from fastapi.staticfiles import StaticFiles
-
-from fastapi.staticfiles import StaticFiles
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -19,9 +16,13 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
+# create upload folder safely
 Path("uploads/slips").mkdir(parents=True, exist_ok=True)
+
+# mount uploads only ONCE
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.BACKEND_CORS_ORIGINS or ["*"],
@@ -30,11 +31,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# routes
 app.include_router(api_router, prefix=settings.API_V1_PREFIX)
 
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
-
-
+# root
 @app.get("/")
 def root() -> dict[str, str]:
-    return {"message": "Dude Payment Sharing System API", "docs": "/docs"}
+    return {
+        "message": "Dude Payment Sharing System API",
+        "docs": "/docs"
+    }
