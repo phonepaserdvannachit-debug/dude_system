@@ -74,4 +74,4 @@ wheel==0.47.0
 yarl==1.24.2
 
 # ✅ IMPORTANT FIX (THIS WAS YOUR CRASH)
-psycopg[binary]
+psycopg2-binary==2.9.9
