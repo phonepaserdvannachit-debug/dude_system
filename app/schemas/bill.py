@@ -23,6 +23,10 @@ class BillCreateRequest(BaseModel):
     items: list[BillItemCreate] = Field(min_length=1)
 
 
+class BillUpdateRequest(BillCreateRequest):
+    pass
+
+
 class ShareResult(BaseModel):
     person_id: int
     cost: Decimal

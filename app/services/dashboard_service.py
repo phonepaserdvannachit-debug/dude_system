@@ -14,36 +14,32 @@ class DashboardService:
         self.db = db
 
     def get_dashboard(self, user_id: int) -> DashboardResponse:
-
-        bills = self.db.scalars(select(Bill)).all()
+        bills = self.db.scalars(
+            select(Bill)
+            .join(Share, Share.bill_id == Bill.id)
+            .where(Share.payer_id == user_id)
+            .order_by(Bill.bill_date.desc(), Bill.id.desc())
+            .distinct()
+        ).all()
 
         total_bills = len(bills)
-        paid_bills = len([b for b in bills if b.paid_status])
+        paid_bills = len([bill for bill in bills if bill.paid_status])
         unpaid_bills = total_bills - paid_bills
-
-        total_amount = sum((b.total_value for b in bills), Decimal("0"))
+        total_amount = sum((bill.total_value for bill in bills), Decimal("0"))
 
         shares = self.db.scalars(
             select(Share).where(Share.payer_id == user_id)
         ).all()
-
-        user_balance = sum((s.net_value for s in shares), Decimal("0"))
-
-        recent = (
-            sorted(bills, key=lambda x: x.id, reverse=True)[:5]
-            if bills
-            else []
-        )
+        user_balance = sum((share.net_value for share in shares), Decimal("0"))
 
         recent_bills = []
-        for b in recent:
-            keeper = self.db.get(Person, b.keeper_id) if b.keeper_id else None
-
+        for bill in bills[:5]:
+            keeper = self.db.get(Person, bill.keeper_id) if bill.keeper_id else None
             recent_bills.append(
                 RecentBill(
-                    bill_id=b.id,
-                    total_value=b.total_value,
-                    bill_date=str(b.bill_date),
+                    bill_id=bill.id,
+                    total_value=bill.total_value,
+                    bill_date=str(bill.bill_date),
                     keeper_name=keeper.name if keeper else None,
                 )
             )

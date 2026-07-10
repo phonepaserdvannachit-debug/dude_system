@@ -9,6 +9,7 @@ from app.schemas.bill import (
     BillCreateResponse,
     BillDetailResponse,
     BillListItem,
+    BillUpdateRequest,
 )
 from app.services.bill_service import BillService
 
@@ -22,7 +23,7 @@ def list_bills(
     current_user: Person = Depends(get_current_user),
 ) -> list[BillListItem]:
     service = BillService(db)
-    return service.list_bills()
+    return service.list_bills(current_user)
 
 
 @router.get("/{bill_id}", response_model=BillDetailResponse)
@@ -32,7 +33,7 @@ def get_bill_detail(
     current_user: Person = Depends(get_current_user),
 ) -> BillDetailResponse:
     service = BillService(db)
-    return service.get_bill_detail(bill_id)
+    return service.get_bill_detail(bill_id, current_user)
 
 
 @router.post(
@@ -47,3 +48,14 @@ def create_bill(
 ) -> BillCreateResponse:
     service = BillService(db)
     return service.create_bill(payload)
+
+
+@router.put("/{bill_id}", response_model=BillDetailResponse)
+def update_bill(
+    bill_id: int,
+    payload: BillUpdateRequest,
+    db: Session = Depends(get_db),
+    current_user: Person = Depends(get_current_user),
+) -> BillDetailResponse:
+    service = BillService(db)
+    return service.update_bill(bill_id, payload, current_user)
