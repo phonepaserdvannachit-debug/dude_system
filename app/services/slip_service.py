@@ -1,6 +1,5 @@
 from datetime import datetime, timezone
 from pathlib import Path
-from uuid import uuid4
 
 from fastapi import HTTPException, UploadFile, status
 from sqlalchemy import select
@@ -11,6 +10,8 @@ from app.models.person import Person
 from app.models.share import Share
 from app.models.slip import Slip
 from app.schemas.slip import SlipDetailResponse, SlipUploadResponse
+from app.core.config import settings
+from app.services.storage_service import upload_file
 
 
 MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
@@ -97,15 +98,8 @@ class SlipService:
                 detail="File size must not exceed 5MB",
             )
 
-        upload_dir = Path("uploads/slips")
-        upload_dir.mkdir(parents=True, exist_ok=True)
-
-        stored_file_name = f"share_{share.id}_{uuid4().hex}{file_suffix}"
-        stored_path = upload_dir / stored_file_name
-
-        stored_path.write_bytes(file_bytes)
-
-        storage_url = f"/uploads/slips/{stored_file_name}"
+        await file.seek(0)
+        storage_url = upload_file(file, settings.SUPABASE_BUCKET_SLIPS)
 
         existing_slip = self.db.scalar(
             select(Slip).where(Slip.share_id == share.id)
