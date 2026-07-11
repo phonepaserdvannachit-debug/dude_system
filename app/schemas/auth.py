@@ -18,3 +18,20 @@ class TokenResponse(BaseModel):
 
 class MeResponse(PersonPublic):
     pass
+
+
+class ProfileUpdateRequest(BaseModel):
+    name: str = Field(..., min_length=1, max_length=50)
+
+
+class PinVerifyRequest(BaseModel):
+    password: str = Field(..., min_length=4, max_length=4, pattern=r"^\d{4}$")
+
+
+class PinChangeRequest(BaseModel):
+    current_password: str = Field(..., min_length=4, max_length=4, pattern=r"^\d{4}$")
+    new_password: str = Field(..., min_length=4, max_length=4, pattern=r"^\d{4}$")
+
+
+class PinVerifyResponse(BaseModel):
+    verified: bool
