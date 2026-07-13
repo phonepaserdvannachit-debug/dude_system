@@ -14,19 +14,18 @@ from app.core.config import settings
 from app.services.storage_service import upload_file
 
 
-MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
+MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB
 
 ALLOWED_CONTENT_TYPES = {
     "image/png",
+    "image/jpg",
     "image/jpeg",
-    "application/pdf",
 }
 
 ALLOWED_EXTENSIONS = {
     ".png",
     ".jpg",
     ".jpeg",
-    ".pdf",
 }
 
 
@@ -74,7 +73,7 @@ class SlipService:
         if file_suffix not in ALLOWED_EXTENSIONS:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Only PNG, JPG, JPEG, and PDF files are allowed",
+                detail="Only PNG, JPG, and JPEG files are allowed",
             )
 
         if file.content_type not in ALLOWED_CONTENT_TYPES:
@@ -95,7 +94,7 @@ class SlipService:
         if file_size > MAX_FILE_SIZE:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="File size must not exceed 5MB",
+                detail="File size must not exceed 50MB",
             )
 
         await file.seek(0)

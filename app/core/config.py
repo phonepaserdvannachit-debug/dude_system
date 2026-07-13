@@ -41,7 +41,7 @@ class Settings(BaseSettings):
 
     SUPABASE_BUCKET_PROFILES: str = "person-profiles"
     SUPABASE_BUCKET_QR: str = "person-qr"
-    SUPABASE_BUCKET_SLIPS: str = "payment-slip"
+    SUPABASE_BUCKET_SLIPS: str = "paymen-slip"
 
     # ---------------- VALIDATOR ----------------
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
