@@ -20,6 +20,7 @@ from app.schemas.bill import (
     BillUpdateRequest,
     ShareResult,
 )
+from app.services.notification_service import NotificationService
 
 
 MONEY = Decimal("0.01")
@@ -344,6 +345,7 @@ class BillService:
 
             self.db.commit()
             self.db.refresh(bill)
+            NotificationService(self.db).notify_bill_created(bill.id)
 
             return BillCreateResponse(
                 bill_id=bill.id,
@@ -427,6 +429,7 @@ class BillService:
 
             self.db.commit()
             self.db.refresh(bill)
+            NotificationService(self.db).notify_bill_updated(bill.id)
 
             return self._get_bill_detail_response(bill)
 

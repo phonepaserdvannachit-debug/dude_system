@@ -11,6 +11,7 @@ from app.models.share import Share
 from app.models.slip import Slip
 from app.schemas.slip import SlipDetailResponse, SlipUploadResponse
 from app.core.config import settings
+from app.services.notification_service import NotificationService
 from app.services.storage_service import upload_file
 
 
@@ -136,6 +137,7 @@ class SlipService:
         self.db.refresh(slip)
         self.db.refresh(share)
         self.db.refresh(bill)
+        NotificationService(self.db).notify_slip_uploaded(bill.id, share.payer_id)
 
         return SlipUploadResponse(
             slip_id=slip.id,

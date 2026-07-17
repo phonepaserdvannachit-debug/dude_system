@@ -43,6 +43,11 @@ class Settings(BaseSettings):
     SUPABASE_BUCKET_QR: str = "person-qr"
     SUPABASE_BUCKET_SLIPS: str = "paymen-slip"
 
+    # ---------------- EMAIL NOTIFICATIONS ----------------
+    RESEND_API_KEY: str | None = None
+    EMAIL_FROM: str = "DUDE System <onboarding@resend.dev>"
+    NOTIFICATION_TEST_EMAIL: str | None = None
+
     # ---------------- VALIDATOR ----------------
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod
