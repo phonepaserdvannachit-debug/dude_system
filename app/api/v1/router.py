@@ -6,6 +6,7 @@ from app.api.v1.endpoints import upload
 from app.api.v1.endpoints import test
 from app.api.v1.endpoints import contract
 from app.api.v1.endpoints import catalog
+from app.api.v1.endpoints import notification
 
 api_router = APIRouter()
 
@@ -18,4 +19,5 @@ api_router.include_router(dashboard.router)
 api_router.include_router(upload.router)
 api_router.include_router(contract.router)
 api_router.include_router(catalog.router)
+api_router.include_router(notification.router)
 api_router.include_router(test.router)

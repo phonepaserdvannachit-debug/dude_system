@@ -2,6 +2,7 @@ from decimal import Decimal
 from html import escape
 
 import httpx
+from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -40,6 +41,17 @@ class NotificationService:
         <p><strong>Total:</strong> {self._money(bill.total_value)} Kip</p>
         """
         self._send_email(subject, html)
+
+    def send_test_email(self) -> dict:
+        result = self._send_email(
+            "DUDE email notification test",
+            """
+            <h2>DUDE email test</h2>
+            <p>If you receive this, Railway and Resend are connected.</p>
+            """,
+            raise_errors=True,
+        )
+        return {"sent": True, "resend": result}
 
     def _send_bill_notice(self, bill_id: int, title: str) -> None:
         bill = self.db.get(Bill, bill_id)
@@ -85,8 +97,18 @@ class NotificationService:
         """
         self._send_email(subject, html)
 
-    def _send_email(self, subject: str, html: str) -> bool:
+    def _send_email(
+        self,
+        subject: str,
+        html: str,
+        raise_errors: bool = False,
+    ) -> bool | dict:
         if not settings.RESEND_API_KEY or not settings.NOTIFICATION_TEST_EMAIL:
+            if raise_errors:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Missing RESEND_API_KEY or NOTIFICATION_TEST_EMAIL",
+                )
             return False
 
         try:
@@ -105,8 +127,23 @@ class NotificationService:
                 timeout=10,
             )
             response.raise_for_status()
-            return True
-        except Exception:
+            return response.json()
+        except httpx.HTTPStatusError as exc:
+            if raise_errors:
+                raise HTTPException(
+                    status_code=status.HTTP_502_BAD_GATEWAY,
+                    detail={
+                        "status_code": exc.response.status_code,
+                        "resend_response": exc.response.text,
+                    },
+                ) from exc
+            return False
+        except Exception as exc:
+            if raise_errors:
+                raise HTTPException(
+                    status_code=status.HTTP_502_BAD_GATEWAY,
+                    detail=str(exc),
+                ) from exc
             return False
 
     def _money(self, value: Decimal | int | float | None) -> str:
